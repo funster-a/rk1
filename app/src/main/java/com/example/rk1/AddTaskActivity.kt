@@ -1,5 +1,11 @@
 package com.example.rk1
 
+import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.util.Log
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 class AddTaskActivity : AppCompatActivity() {
 
     private lateinit var titleEditText: EditText

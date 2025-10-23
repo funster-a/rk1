@@ -1,5 +1,12 @@
 package com.example.rk1
 
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+
 class TaskAdapter(
     private val tasks: List<Task>,
     private val onItemClick: (Task) -> Unit

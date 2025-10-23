@@ -1,5 +1,11 @@
 package com.example.rk1
 
+import android.graphics.Color
+import android.os.Bundle
+import android.util.Log
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+
 class TaskDetailActivity : AppCompatActivity() {
 
     private lateinit var taskTitle: TextView
@@ -44,5 +50,31 @@ class TaskDetailActivity : AppCompatActivity() {
             else -> Color.GRAY
         }
         taskPriority.setTextColor(priorityColor)
+    }
+
+    // Добавляем методы жизненного цикла для полноты
+    override fun onStart() {
+        super.onStart()
+        Log.d("Lifecycle", "TaskDetailActivity - onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("Lifecycle", "TaskDetailActivity - onResume")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("Lifecycle", "TaskDetailActivity - onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("Lifecycle", "TaskDetailActivity - onStop")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("Lifecycle", "TaskDetailActivity - onDestroy")
     }
 }

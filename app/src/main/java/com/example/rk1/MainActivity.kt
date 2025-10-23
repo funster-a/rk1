@@ -1,10 +1,13 @@
 package com.example.rk1
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.util.Log
+import android.widget.Button
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,6 +18,26 @@ class MainActivity : AppCompatActivity() {
 
     // Используем HashMap для хранения задач по ID (тема: Коллекции Kotlin)
     private val taskMap = HashMap<Int, Task>()
+
+    // Современный способ обработки результата активности
+    private val addTaskLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val title = data?.getStringExtra("TITLE") ?: ""
+            val description = data?.getStringExtra("DESCRIPTION") ?: ""
+            val deadline = data?.getStringExtra("DEADLINE") ?: ""
+            val priority = data?.getStringExtra("PRIORITY") ?: "Средний"
+
+            val newId = taskList.size + 1
+            val newTask = Task(newId, title, description, deadline, priority)
+
+            taskList.add(newTask)
+            taskMap[newId] = newTask
+            adapter.notifyItemInserted(taskList.size - 1)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,28 +96,11 @@ class MainActivity : AppCompatActivity() {
         addTaskButton.setOnClickListener {
             // Тема: Multiple Activities and Intents
             val intent = Intent(this, AddTaskActivity::class.java)
-            startActivityForResult(intent, ADD_TASK_REQUEST)
+            addTaskLauncher.launch(intent)
         }
     }
 
     // Тема: Жизненный цикл активности
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == ADD_TASK_REQUEST && resultCode == RESULT_OK) {
-            val title = data?.getStringExtra("TITLE") ?: ""
-            val description = data?.getStringExtra("DESCRIPTION") ?: ""
-            val deadline = data?.getStringExtra("DEADLINE") ?: ""
-            val priority = data?.getStringExtra("PRIORITY") ?: "Средний"
-
-            val newId = taskList.size + 1
-            val newTask = Task(newId, title, description, deadline, priority)
-
-            taskList.add(newTask)
-            taskMap[newId] = newTask
-            adapter.notifyItemInserted(taskList.size - 1)
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         Log.d("Lifecycle", "MainActivity - onStart")
