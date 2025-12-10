@@ -15,22 +15,27 @@ cannot access class com.sun.tools.javac.main.JavaCompiler
 
 **Исправления уже применены:**
 
-1. ✅ Добавлены JVM аргументы в `gradle.properties` для открытия модулей Java
-2. ✅ Добавлены настройки KAPT в `app/build.gradle.kts`
+1. ✅ Добавлены JVM аргументы в `gradle.properties` для Gradle daemon
+2. ✅ Добавлены JVM аргументы для Kotlin daemon в `gradle.properties`
+3. ✅ Добавлены javacOptions в блок `kapt` в `app/build.gradle.kts`
 
-## 🚀 Что делать дальше:
+## 🚀 Что делать дальше (ОБЯЗАТЕЛЬНО!):
 
-1. **Закройте Android Studio** (если открыт)
+1. **Остановите все Gradle процессы:**
+   - В терминале Android Studio выполните: `./gradlew --stop`
+   - ИЛИ закройте Android Studio полностью
 
 2. **Очистите кэш Gradle:**
    - В Android Studio: File → Invalidate Caches → Invalidate and Restart
    - ИЛИ вручную удалите папку `.gradle` в корне проекта
+   - ИЛИ выполните: `./gradlew clean --no-daemon`
 
-3. **Перезапустите Android Studio**
+3. **Перезапустите Android Studio** (если закрывали)
 
 4. **Синхронизируйте проект:**
    - File → Sync Project with Gradle Files
    - Или нажмите на уведомление "Sync Now"
+   - Дождитесь полной синхронизации
 
 5. **Попробуйте собрать снова:**
    - Build → Clean Project
@@ -62,12 +67,21 @@ cannot access class com.sun.tools.javac.main.JavaCompiler
 --add-opens=jdk.compiler/com.sun.tools.javac.*=ALL-UNNAMED
 ```
 
+### `gradle.properties`
+Добавлены аргументы для Kotlin daemon:
+```
+kotlin.daemon.jvmargs=--add-opens=jdk.compiler/com.sun.tools.javac.*=ALL-UNNAMED
+```
+
 ### `app/build.gradle.kts`
-Добавлен блок `kapt`:
+Добавлен блок `kapt` с javacOptions:
 ```kotlin
 kapt {
     correctErrorTypes = true
     useBuildCache = true
+    javacOptions {
+        option("--add-opens", "jdk.compiler/com.sun.tools.javac.*=ALL-UNNAMED")
+    }
 }
 ```
 
