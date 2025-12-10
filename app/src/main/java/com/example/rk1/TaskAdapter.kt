@@ -10,8 +10,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class TaskAdapter(
-    private val tasks: MutableList<Task>,
-    private val onItemClick: (Task) -> Unit
+    private val tasks: List<Task>,
+    private val onItemClick: (Task) -> Unit,
+    private val onTaskCompletionChanged: ((Int, Boolean) -> Unit)? = null
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -42,7 +43,7 @@ class TaskAdapter(
             else -> Color.GRAY
         }
         holder.priorityTextView.setTextColor(priorityColor)
-        
+
         if (task.isCompleted) {
             holder.titleTextView.paintFlags = holder.titleTextView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             holder.deadlineTextView.paintFlags = holder.deadlineTextView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
@@ -54,10 +55,9 @@ class TaskAdapter(
         holder.itemView.setOnClickListener {
             onItemClick(task)
         }
-        
+
         holder.taskCompleted.setOnCheckedChangeListener { _, isChecked ->
-            task.isCompleted = isChecked
-            notifyItemChanged(position)
+            onTaskCompletionChanged?.invoke(task.id, isChecked)
         }
     }
 

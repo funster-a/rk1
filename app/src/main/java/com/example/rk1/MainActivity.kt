@@ -9,9 +9,9 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
@@ -24,7 +24,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var emptyView: TextView
     private lateinit var adapter: TaskAdapter
 
-    private val viewModel: TaskViewModel by viewModels()
+    private val viewModel: TaskViewModel by lazy {
+        ViewModelProvider(this)[TaskViewModel::class.java]
+    }
 
     private val addTaskLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -52,6 +54,17 @@ class MainActivity : AppCompatActivity() {
                 val deadline = data.getStringExtra("TASK_DEADLINE") ?: ""
                 val priority = data.getStringExtra("TASK_PRIORITY") ?: ""
                 viewModel.updateTask(taskId, title, description, deadline, priority)
+            } else if (data?.hasExtra("TITLE") == true) { // Task was added/edited from AddTaskActivity
+                val title = data.getStringExtra("TITLE") ?: ""
+                val description = data.getStringExtra("DESCRIPTION") ?: ""
+                val deadline = data.getStringExtra("DEADLINE") ?: ""
+                val priority = data.getStringExtra("PRIORITY") ?: ""
+                val editTaskId = data.getIntExtra("TASK_ID", -1)
+                if (editTaskId != -1) {
+                    viewModel.updateTask(editTaskId, title, description, deadline, priority)
+                } else {
+                    viewModel.addTask(title, description, deadline, priority)
+                }
             } else { // Task was deleted
                 viewModel.deleteTask(taskId)
             }
@@ -69,19 +82,26 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         setupClickListeners()
 
-        viewModel.taskList.observe(this, Observer {
-            adapter = TaskAdapter(it) { task ->
-                val intent = Intent(this, TaskDetailActivity::class.java).apply {
-                    putExtra("TASK_ID", task.id)
-                    putExtra("TASK_TITLE", task.title)
-                    putExtra("TASK_DESCRIPTION", task.description)
-                    putExtra("TASK_DEADLINE", task.deadline)
-                    putExtra("TASK_PRIORITY", task.priority)
+        viewModel.taskList.observe(this, Observer { taskList ->
+            adapter = TaskAdapter(
+                tasks = taskList,
+                onItemClick = { task ->
+                    val intent = Intent(this, TaskDetailActivity::class.java).apply {
+                        putExtra("TASK_ID", task.id)
+                        putExtra("TASK_TITLE", task.title)
+                        putExtra("TASK_DESCRIPTION", task.description)
+                        putExtra("TASK_DEADLINE", task.deadline)
+                        putExtra("TASK_PRIORITY", task.priority)
+                        putExtra("TASK_COMPLETED", task.isCompleted)
+                    }
+                    taskDetailLauncher.launch(intent)
+                },
+                onTaskCompletionChanged = { taskId, isCompleted ->
+                    viewModel.updateTaskCompletion(taskId, isCompleted)
                 }
-                taskDetailLauncher.launch(intent)
-            }
+            )
             tasksRecyclerView.adapter = adapter
-            checkEmptyView()
+            checkEmptyView(taskList)
         })
     }
 
@@ -102,8 +122,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkEmptyView() {
-        if (viewModel.taskList.value?.isEmpty() == true) {
+    private fun checkEmptyView(taskList: List<Task>) {
+        if (taskList.isEmpty()) {
             tasksRecyclerView.visibility = View.GONE
             emptyView.visibility = View.VISIBLE
         } else {

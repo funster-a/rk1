@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 
 class TaskDetailActivity : AppCompatActivity() {
@@ -18,6 +19,35 @@ class TaskDetailActivity : AppCompatActivity() {
     private lateinit var taskPriority: TextView
 
     private var taskId: Int = -1
+    private var currentTitle: String = ""
+    private var currentDescription: String = ""
+    private var currentDeadline: String = ""
+    private var currentPriority: String = ""
+
+    private val editTaskLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            val editedTaskId = data?.getIntExtra("TASK_ID", -1) ?: -1
+            if (editedTaskId == taskId) {
+                val title = data?.getStringExtra("TITLE") ?: ""
+                val description = data?.getStringExtra("DESCRIPTION") ?: ""
+                val deadline = data?.getStringExtra("DEADLINE") ?: ""
+                val priority = data?.getStringExtra("PRIORITY") ?: ""
+
+                val resultIntent = Intent().apply {
+                    putExtra("TASK_ID", taskId)
+                    putExtra("TASK_TITLE", title)
+                    putExtra("TASK_DESCRIPTION", description)
+                    putExtra("TASK_DEADLINE", deadline)
+                    putExtra("TASK_PRIORITY", priority)
+                }
+                setResult(Activity.RESULT_OK, resultIntent)
+                finish()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,17 +68,17 @@ class TaskDetailActivity : AppCompatActivity() {
 
     private fun displayTaskDetails() {
         taskId = intent.getIntExtra("TASK_ID", -1)
-        val title = intent.getStringExtra("TASK_TITLE") ?: "Без названия"
-        val description = intent.getStringExtra("TASK_DESCRIPTION") ?: "Нет описания"
-        val deadline = intent.getStringExtra("TASK_DEADLINE") ?: "Не указан"
-        val priority = intent.getStringExtra("TASK_PRIORITY") ?: "Средний"
+        currentTitle = intent.getStringExtra("TASK_TITLE") ?: "Без названия"
+        currentDescription = intent.getStringExtra("TASK_DESCRIPTION") ?: "Нет описания"
+        currentDeadline = intent.getStringExtra("TASK_DEADLINE") ?: "Не указан"
+        currentPriority = intent.getStringExtra("TASK_PRIORITY") ?: "Средний"
 
-        taskTitle.text = title
-        taskDescription.text = "Описание: $description"
-        taskDeadline.text = "Срок выполнения: $deadline"
-        taskPriority.text = "Приоритет: $priority"
+        taskTitle.text = currentTitle
+        taskDescription.text = "Описание: $currentDescription"
+        taskDeadline.text = "Срок выполнения: $currentDeadline"
+        taskPriority.text = "Приоритет: $currentPriority"
 
-        val priorityColor = when (priority) {
+        val priorityColor = when (currentPriority) {
             "Высокий" -> Color.RED
             "Средний" -> Color.BLUE
             else -> Color.GRAY
@@ -78,12 +108,12 @@ class TaskDetailActivity : AppCompatActivity() {
     private fun editTask() {
         val intent = Intent(this, AddTaskActivity::class.java).apply {
             putExtra("TASK_ID", taskId)
-            putExtra("TASK_TITLE", taskTitle.text.toString())
-            putExtra("TASK_DESCRIPTION", taskDescription.text.toString())
-            putExtra("TASK_DEADLINE", taskDeadline.text.toString())
-            putExtra("TASK_PRIORITY", taskPriority.text.toString())
+            putExtra("TASK_TITLE", currentTitle)
+            putExtra("TASK_DESCRIPTION", currentDescription)
+            putExtra("TASK_DEADLINE", currentDeadline)
+            putExtra("TASK_PRIORITY", currentPriority)
         }
-        startActivityForResult(intent, EDIT_TASK_REQUEST)
+        editTaskLauncher.launch(intent)
     }
 
     private fun deleteTask() {
@@ -91,17 +121,5 @@ class TaskDetailActivity : AppCompatActivity() {
         resultIntent.putExtra("TASK_ID", taskId)
         setResult(Activity.RESULT_OK, resultIntent)
         finish()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == EDIT_TASK_REQUEST && resultCode == Activity.RESULT_OK) {
-            setResult(Activity.RESULT_OK, data)
-            finish()
-        }
-    }
-
-    companion object {
-        const val EDIT_TASK_REQUEST = 2
     }
 }

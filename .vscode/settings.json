@@ -1,0 +1,47 @@
+{
+    "files.exclude": {
+        "**/.gradle": true,
+        "**/build": true,
+        "**/.idea": true,
+        "**/.DS_Store": true
+    },
+    "files.associations": {
+        "*.kt": "kotlin",
+        "*.kts": "kotlin",
+        "*.gradle.kts": "kotlin"
+    },
+    "kotlin.languageServer.enabled": true,
+    "kotlin.compiler.jvm.target": "11",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "xml.fileAssociations": [
+        {
+            "pattern": "**/res/**/*.xml",
+            "systemId": "http://schemas.android.com/apk/res/android"
+        }
+    ],
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "[kotlin]": {
+        "editor.defaultFormatter": "fwcd.kotlin",
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml",
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[json]": {
+        "editor.tabSize": 2
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "search.exclude": {
+        "**/build": true,
+        "**/.gradle": true,
+        "**/node_modules": true
+    },
+    "gradle.nestedProjects": true
+}

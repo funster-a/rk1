@@ -14,6 +14,9 @@ class AddTaskActivity : AppCompatActivity() {
     private lateinit var prioritySpinner: Spinner
     private lateinit var saveButton: Button
 
+    private var isEditMode = false
+    private var taskId: Int = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task)
@@ -22,6 +25,7 @@ class AddTaskActivity : AppCompatActivity() {
 
         initViews()
         setupSpinner()
+        checkEditMode()
         setupSaveButton()
     }
 
@@ -40,6 +44,32 @@ class AddTaskActivity : AppCompatActivity() {
         prioritySpinner.adapter = adapter
     }
 
+    private fun checkEditMode() {
+        taskId = intent.getIntExtra("TASK_ID", -1)
+        if (taskId != -1) {
+            isEditMode = true
+            val title = intent.getStringExtra("TASK_TITLE") ?: ""
+            val description = intent.getStringExtra("TASK_DESCRIPTION") ?: ""
+            val deadline = intent.getStringExtra("TASK_DEADLINE") ?: ""
+            val priority = intent.getStringExtra("TASK_PRIORITY") ?: "Средний"
+
+            // Remove "Описание: " prefix if present
+            val cleanDescription = description.removePrefix("Описание: ")
+            val cleanDeadline = deadline.removePrefix("Срок выполнения: ")
+            val cleanPriority = priority.removePrefix("Приоритет: ")
+
+            titleEditText.setText(title)
+            descriptionEditText.setText(cleanDescription)
+            deadlineEditText.setText(cleanDeadline)
+
+            val priorities = arrayOf("Высокий", "Средний", "Низкий")
+            val priorityIndex = priorities.indexOf(cleanPriority)
+            if (priorityIndex >= 0) {
+                prioritySpinner.setSelection(priorityIndex)
+            }
+        }
+    }
+
     private fun setupSaveButton() {
         saveButton.setOnClickListener {
             val title = titleEditText.text.toString()
@@ -54,6 +84,9 @@ class AddTaskActivity : AppCompatActivity() {
             }
 
             val resultIntent = Intent().apply {
+                if (isEditMode) {
+                    putExtra("TASK_ID", taskId)
+                }
                 putExtra("TITLE", title)
                 putExtra("DESCRIPTION", description)
                 putExtra("DEADLINE", deadline)
