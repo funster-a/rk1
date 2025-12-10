@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp") version "1.9.0-1.0.13"
 }
 
 android {
@@ -36,21 +36,8 @@ android {
     }
 }
 
-kapt {
-    correctErrorTypes = true
-    useBuildCache = true
-    javacOptions {
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
-        option("--add-opens", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
-    }
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -63,7 +50,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.room:room-runtime:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     testImplementation(libs.junit)
